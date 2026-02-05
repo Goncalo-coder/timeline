@@ -11,10 +11,12 @@
 :root{
   --bg:#0f172a;
   --bar:#6366f1;
-  --line:#ef4444;
+  --line:#ff0000;
   --card:#020617;
   --text:#e5e7eb;
   --muted:#94a3b8;
+  --weekend:#e5e7eb;
+  --todayBg:rgba(255,0,0,0.15);
 }
 
 *{
@@ -47,6 +49,13 @@ body{
   gap:15px;
 }
 
+.controls label{
+  font-size:12px;
+  color:var(--muted);
+  display:block;
+  margin-bottom:4px;
+}
+
 .controls input,
 .controls select,
 .controls button{
@@ -54,6 +63,7 @@ body{
   border-radius:6px;
   border:none;
   font-size:14px;
+  width:100%;
 }
 
 .controls button{
@@ -99,6 +109,8 @@ body{
   overflow:hidden;
 }
 
+/* Scale */
+
 .scale-row{
   display:flex;
   font-size:12px;
@@ -109,45 +121,69 @@ body{
   flex:1;
   text-align:center;
   border-right:1px solid #1e293b;
-  padding-bottom:8px;
+  padding:6px 2px;
 }
 
 .scale-item:last-child{
   border:none;
 }
 
-/* Bar */
+.scale-item.weekend{
+  background:#f1f5f9;
+  color:#0f172a;
+}
+
+.scale-item.today{
+  background:var(--todayBg);
+  color:white;
+  font-weight:600;
+}
+
+/* ================= BAR ================= */
+
+/* White background container */
 
 .bar-container{
   position:relative;
-  height:40px;
-  background:#020617;
-  border-radius:20px;
+  height:44px;
+  background:white;
+  border-radius:22px;
   overflow:hidden;
+  margin-top:8px;
 }
+
+/* Solid color bar */
 
 .bar{
   position:absolute;
   inset:0;
-  background:linear-gradient(90deg,var(--bar),#8b5cf6);
+  background:var(--bar);
 }
 
-/* Today */
+/* ================= TODAY LINE ================= */
 
 .today{
   position:absolute;
-  top:-10px;
-  bottom:-10px;
-  width:2px;
+  top:-20px;
+  bottom:-20px;
+  width:4px;
   background:var(--line);
+  box-shadow:
+    0 0 10px var(--line),
+    0 0 20px var(--line);
+  z-index:5;
 }
 
 .today-label{
   position:absolute;
-  top:-22px;
+  top:-28px;
   transform:translateX(-50%);
-  font-size:11px;
+  font-size:12px;
+  font-weight:600;
   color:var(--line);
+  background:#020617;
+  padding:2px 6px;
+  border-radius:4px;
 }
 
 /* ================= STATS ================= */
@@ -183,6 +219,16 @@ body{
   border:none;
   background:#020617;
   color:white;
+  margin-bottom:10px;
+}
+
+.share button{
+  padding:8px 14px;
+  border:none;
+  border-radius:6px;
+  background:var(--bar);
+  color:white;
+  cursor:pointer;
 }
 
 </style>
@@ -196,27 +242,51 @@ body{
 
 <div class="controls">
 
-<input id="title" placeholder="Timeline title">
+<div>
+<label>Title</label>
+<input id="title">
+</div>
 
+<div>
+<label>Start</label>
 <input type="date" id="start">
-<input type="date" id="end">
+</div>
 
+<div>
+<label>End</label>
+<input type="date" id="end">
+</div>
+
+<div>
+<label>Scale</label>
 <select id="scale">
   <option value="day">Daily</option>
   <option value="week">Weekly</option>
   <option value="month">Monthly</option>
   <option value="quarter">Quarterly</option>
 </select>
+</div>
 
-<input type="color" id="bg" title="Background">
-<input type="color" id="bar" title="Bar color">
-<input type="color" id="line" title="Today line">
+<div>
+<label>Background</label>
+<input type="color" id="bg">
+</div>
+
+<div>
+<label>Bar Color</label>
+<input type="color" id="bar">
+</div>
+
+<div>
+<label>Today Line</label>
+<input type="color" id="line">
+</div>
 
 <button onclick="generate()">Generate</button>
 
 </div>
 
-<!-- ================= PREVIEW ================= -->
+<!-- ================= CARD ================= -->
 
 <div class="card">
 
@@ -234,7 +304,7 @@ body{
   <div class="bar"></div>
 
   <div class="today" id="todayLine"></div>
-  <div class="today-label" id="todayLabel">Today</div>
+  <div class="today-label" id="todayLabel">TODAY</div>
 
 </div>
 
@@ -262,7 +332,10 @@ body{
 <div class="share">
 
 <p>Shareable URL</p>
+
 <input id="shareLink" readonly>
+
+<button onclick="copyLink()">Copy Link</button>
 
 </div>
 
@@ -297,7 +370,7 @@ const defaults = {
   scale:"week",
   bg:"#0f172a",
   bar:"#6366f1",
-  line:"#ef4444"
+  line:"#ff0000"
 };
 
 /* ================= INIT ================= */
@@ -338,13 +411,13 @@ function build(){
 
   const totalDays = diffDays(s,e);
   const doneDays = Math.max(0,Math.min(totalDays,diffDays(s,n)));
-  const percent = Math.round(doneDays/totalDays*100);
+  const percentVal = Math.round(doneDays/totalDays*100);
 
   viewTitle.textContent = title.value;
   viewDates.textContent =
     s.toDateString()+" — "+e.toDateString();
 
-  renderScale(s,e,scale.value);
+  renderScale(s,e,scale.value,n);
 
   /* Today line */
 
@@ -355,6 +428,9 @@ function build(){
     todayLine.style.left = p+"%";
     todayLabel.style.left = p+"%";
 
+    todayLine.style.display="block";
+    todayLabel.style.display="block";
+
   }else{
     todayLine.style.display="none";
     todayLabel.style.display="none";
@@ -362,7 +438,7 @@ function build(){
 
   /* Stats */
 
-  let units,total,left;
+  let units;
 
   if(scale.value==="day"){
     units=totalDays;
@@ -380,17 +456,113 @@ function build(){
   }
 
   if(scale.value==="quarter"){
-    units=Math.ceil(((e-s)/86400000)/90);
+    units=Math.ceil(totalDays/90);
     unitLabel.textContent="Total Quarters";
   }
 
-  left = Math.max(0,Math.round(units-units*(percent/100)));
+  const leftVal = Math.max(0,Math.round(units-units*(percentVal/100)));
 
   total.textContent = units;
-  percent.textContent = percent+"%";
-  left.textContent = left;
+  percent.textContent = percentVal+"%";
+  left.textContent = leftVal;
 
-  /* Share URL */
+  updateShare();
+}
+
+/* ================= SCALE ================= */
+
+function renderScale(s,e,type,now){
+
+  scaleRow.innerHTML="";
+
+  if(type==="day"){
+
+    let d=new Date(s);
+
+    while(d<e){
+
+      const label =
+        d.toLocaleDateString("en",{
+          weekday:"short",
+          day:"2-digit"
+        });
+
+      scaleRow.appendChild(createScale(label,d,now));
+
+      d.setDate(d.getDate()+1);
+    }
+  }
+
+  if(type==="week"){
+
+    let d=new Date(s);
+    let i=1;
+
+    while(d<e){
+
+      scaleRow.appendChild(createScale("W"+i,d,now));
+
+      d.setDate(d.getDate()+7);
+      i++;
+    }
+  }
+
+  if(type==="month"){
+
+    let d=new Date(s);
+
+    while(d<e){
+
+      const label =
+        d.toLocaleDateString("en",{month:"short",year:"numeric"});
+
+      scaleRow.appendChild(createScale(label,d,now));
+
+      d.setMonth(d.getMonth()+1);
+    }
+  }
+
+  if(type==="quarter"){
+
+    let d=new Date(s);
+
+    while(d<e){
+
+      const q=Math.floor(d.getMonth()/3)+1;
+
+      scaleRow.appendChild(
+        createScale("Q"+q+" "+d.getFullYear(),d,now)
+      );
+
+      d.setMonth(d.getMonth()+3);
+    }
+  }
+}
+
+/* ================= SCALE CELL ================= */
+
+function createScale(label,date,now){
+
+  const div=document.createElement("div");
+  div.className="scale-item";
+  div.textContent=label;
+
+  const day = date.getDay();
+
+  if(day===0 || day===6){
+    div.classList.add("weekend");
+  }
+
+  if(date.toDateString()===now.toDateString()){
+    div.classList.add("today");
+  }
+
+  return div;
+}
+
+/* ================= URL ================= */
+
+function updateShare(){
 
   const url =
     location.origin+
@@ -406,91 +578,23 @@ function build(){
   shareLink.value = url;
 }
 
-/* ================= SCALE ================= */
-
-function renderScale(s,e,type){
-
-  scaleRow.innerHTML="";
-
-  if(type==="day"){
-    let d=new Date(s);
-
-    while(d<e){
-
-      addScale(
-        d.toLocaleDateString("en",{day:"2-digit",month:"short"})
-      );
-
-      d.setDate(d.getDate()+1);
-    }
-  }
-
-  if(type==="week"){
-    let d=new Date(s);
-    let i=1;
-
-    while(d<e){
-
-      addScale("W"+i);
-      i++;
-      d.setDate(d.getDate()+7);
-    }
-  }
-
-  if(type==="month"){
-    let d=new Date(s);
-
-    while(d<e){
-
-      addScale(
-        d.toLocaleDateString("en",{month:"short",year:"numeric"})
-      );
-
-      d.setMonth(d.getMonth()+1);
-    }
-  }
-
-  if(type==="quarter"){
-    let d=new Date(s);
-
-    while(d<e){
-
-      const q=Math.floor(d.getMonth()/3)+1;
-      addScale("Q"+q+" "+d.getFullYear());
-
-      d.setMonth(d.getMonth()+3);
-    }
-  }
-
-}
-
-function addScale(label){
-
-  const div=document.createElement("div");
-  div.className="scale-item";
-  div.textContent=label;
-
-  scaleRow.appendChild(div);
-}
-
 /* ================= GENERATE ================= */
 
 function generate(){
 
-  const url =
-    location.pathname+
-    `?title=${encodeURIComponent(title.value)}`+
-    `&start=${start.value}`+
-    `&end=${end.value}`+
-    `&scale=${scale.value}`+
-    `&bg=${bg.value.replace("#","%23")}`+
-    `&bar=${bar.value.replace("#","%23")}`+
-    `&line=${line.value.replace("#","%23")}`;
-
-  location.href = url;
+  updateShare();
+  location.href = shareLink.value;
 }
 
-/* Auto refresh daily */
+/* ================= COPY ================= */
+
+function copyLink(){
+  shareLink.select();
+  document.execCommand("copy");
+  alert("Link copied");
+}
+
+/* Auto refresh every hour */
 
 setInterval(build,3600000);
 
