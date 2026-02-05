@@ -248,4 +248,293 @@ body{
 
 <div>
 <label>End</label>
-<input type="date" id="en
+<input type="date" id="end">
+</div>
+
+<div>
+<label>Scale</label>
+<select id="scale">
+  <option value="day">Daily</option>
+  <option value="week">Weekly</option>
+</select>
+</div>
+
+<div>
+<label>Background</label>
+<input type="color" id="bg">
+</div>
+
+<div>
+<label>Bar</label>
+<input type="color" id="bar">
+</div>
+
+<div>
+<label>Today Line</label>
+<input type="color" id="line">
+</div>
+
+<button onclick="generate()">Generate</button>
+
+</div>
+
+<!-- CARD -->
+
+<div class="card">
+
+<div class="header">
+  <h1 id="viewTitle"></h1>
+  <p id="viewDates"></p>
+</div>
+
+<div class="scale-row" id="scaleRow"></div>
+
+<div class="bar-wrapper">
+
+  <div class="grid" id="grid"></div>
+
+  <div class="bar"></div>
+
+  <div class="today" id="todayLine"></div>
+  <div class="today-label" id="todayLabel">Today</div>
+
+</div>
+
+<div class="stats">
+
+<div class="stat">
+  <strong id="total"></strong>
+  <span id="unitLabel"></span>
+</div>
+
+<div class="stat">
+  <strong id="percent"></strong>
+  <span>Complete</span>
+</div>
+
+<div class="stat">
+  <strong id="left"></strong>
+  <span>Left</span>
+</div>
+
+</div>
+
+<div class="share">
+
+<p>Shareable URL</p>
+
+<input id="shareLink" readonly>
+
+<button onclick="copyLink()">Copy Link</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+/* Helpers */
+
+function qs(k){
+  return new URLSearchParams(location.search).get(k);
+}
+
+function format(d){
+  return d.toISOString().split("T")[0];
+}
+
+function diffDays(a,b){
+  return Math.ceil((b-a)/86400000);
+}
+
+/* Defaults */
+
+const now=new Date();
+
+const defaults={
+  title:"My Timeline",
+  start:format(now),
+  end:format(new Date(now.getFullYear(),now.getMonth()+3,now.getDate())),
+  scale:"week",
+  bg:"#0f172a",
+  bar:"#6366f1",
+  line:"#ff0000"
+};
+
+/* Init */
+
+const cfg={
+  title:qs("title")||defaults.title,
+  start:qs("start")||defaults.start,
+  end:qs("end")||defaults.end,
+  scale:qs("scale")||defaults.scale,
+  bg:qs("bg")||defaults.bg,
+  bar:qs("bar")||defaults.bar,
+  line:qs("line")||defaults.line
+};
+
+document.body.style.background=cfg.bg;
+document.documentElement.style.setProperty("--bar",cfg.bar);
+document.documentElement.style.setProperty("--line",cfg.line);
+
+/* Fill */
+
+title.value=cfg.title;
+start.value=cfg.start;
+end.value=cfg.end;
+scale.value=cfg.scale;
+bg.value=cfg.bg;
+bar.value=cfg.bar;
+line.value=cfg.line;
+
+build();
+
+/* Build */
+
+function build(){
+
+  const s=new Date(start.value);
+  const e=new Date(end.value);
+  const n=new Date();
+
+  viewTitle.textContent=title.value;
+  viewDates.textContent=
+    s.toDateString()+" — "+e.toDateString();
+
+  renderScale(s,e,scale.value,n);
+  renderGrid();
+
+  const totalDays=diffDays(s,e);
+  const done=Math.min(totalDays,Math.max(0,diffDays(s,n)));
+  const pct=Math.round(done/totalDays*100);
+
+  if(n>=s&&n<=e){
+
+    const p=done/totalDays*100;
+
+    todayLine.style.left=p+"%";
+    todayLabel.style.left=p+"%";
+
+  }else{
+    todayLine.style.display="none";
+    todayLabel.style.display="none";
+  }
+
+  let units;
+
+  if(scale.value==="day"){
+    units=totalDays;
+    unitLabel.textContent="Total Days";
+  }
+
+  if(scale.value==="week"){
+    units=Math.ceil(totalDays/7);
+    unitLabel.textContent="Total Weeks";
+  }
+
+  total.textContent=units;
+  percent.textContent=pct+"%";
+  left.textContent=Math.max(0,units-Math.round(units*pct/100));
+
+  updateShare();
+}
+
+/* Scale */
+
+function renderScale(s,e,type,now){
+
+  scaleRow.innerHTML="";
+
+  let d=new Date(s);
+  let i=1;
+
+  while(d<e){
+
+    const div=document.createElement("div");
+    div.className="scale-item";
+
+    if(type==="day"){
+
+      div.innerHTML=
+        d.toLocaleDateString("en",{weekday:"short"})+
+        "<small>"+d.getDate()+"</small>";
+
+      d.setDate(d.getDate()+1);
+    }
+
+    if(type==="week"){
+
+      const label="W"+i;
+
+      const dateLabel=
+        d.toLocaleDateString("en",{month:"short",day:"numeric"});
+
+      div.innerHTML=
+        label+
+        "<small>"+dateLabel+"</small>";
+
+      d.setDate(d.getDate()+7);
+      i++;
+    }
+
+    scaleRow.appendChild(div);
+  }
+}
+
+/* Grid */
+
+function renderGrid(){
+
+  grid.innerHTML="";
+
+  const count=scaleRow.children.length;
+
+  for(let i=0;i<count;i++){
+    const d=document.createElement("div");
+    grid.appendChild(d);
+  }
+}
+
+/* URL */
+
+function updateShare(){
+
+  const url=
+    location.origin+
+    location.pathname+
+    `?title=${encodeURIComponent(title.value)}`+
+    `&start=${start.value}`+
+    `&end=${end.value}`+
+    `&scale=${scale.value}`+
+    `&bg=${bg.value.replace("#","%23")}`+
+    `&bar=${bar.value.replace("#","%23")}`+
+    `&line=${line.value.replace("#","%23")}`;
+
+  shareLink.value=url;
+}
+
+/* Generate */
+
+function generate(){
+  updateShare();
+  location.href=shareLink.value;
+}
+
+/* Copy */
+
+function copyLink(){
+  shareLink.select();
+  document.execCommand("copy");
+  alert("Copied");
+}
+
+/* Auto refresh */
+
+setInterval(build,3600000);
+
+</script>
+
+</body>
+</html>
