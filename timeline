@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timeline Builder</title>
+
+<style>
+:root {
+  --bg: #0f172a;
+  --card: #020617;
+  --accent: #6366f1;
+  --line: #f43f5e;
+  --text: #e5e7eb;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.app {
+  max-width: 1200px;
+  margin: auto;
+  padding: 40px 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* Controls */
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+input, select, button {
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+}
+
+button {
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: .9;
+}
+
+/* Timeline */
+
+.timeline-wrapper {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 20px;
+  overflow-x: auto;
+}
+
+.timeline {
+  position: relative;
+  height: 100px;
+  min-width: 600px;
+  display: flex;
+}
+
+.segment {
+  flex: 1;
+  border-right: 1px solid #1e293b;
+  text-align: center;
+  font-size: 12px;
+  padding-top: 70px;
+  color: #94a3b8;
+}
+
+.segment:last-child {
+  border-right: none;
+}
+
+/* Bar */
+
+.bar {
+  position: absolute;
+  top: 30px;
+  left: 0;
+  height: 20px;
+  background: linear-gradient(90deg,#6366f1,#8b5cf6);
+  border-radius: 10px;
+}
+
+/* Today line */
+
+.today {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--line);
+}
+
+.today-label {
+  position: absolute;
+  top: -22px;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: var(--line);
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<h1>Timeline Builder</h1>
+
+<div class="controls">
+
+<input type="date" id="start">
+<input type="date" id="end">
+
+<select id="scale">
+  <option value="week">Weekly</option>
+  <option value="month">Monthly</option>
+  <option value="quarter">Quarterly</option>
+</select>
+
+<button onclick="build()">Generate</button>
+
+</div>
+
+<div class="timeline-wrapper">
+
+  <div class="timeline" id="timeline"></div>
+
+</div>
+
+</div>
+
+<script>
+
+const startInput = document.getElementById("start");
+const endInput = document.getElementById("end");
+const scaleSelect = document.getElementById("scale");
+const timeline = document.getElementById("timeline");
+
+/* Default dates */
+
+const today = new Date();
+startInput.value = format(today);
+
+const end = new Date();
+end.setMonth(end.getMonth() + 3);
+endInput.value = format(end);
+
+/* Format yyyy-mm-dd */
+
+function format(d) {
+  return d.toISOString().split("T")[0];
+}
+
+/* Build timeline */
+
+function build() {
+
+  const start = new Date(startInput.value);
+  const end = new Date(endInput.value);
+  const scale = scaleSelect.value;
+
+  if (start >= end) {
+    alert("End date must be after start date");
+    return;
+  }
+
+  timeline.innerHTML = "";
+
+  let segments = [];
+
+  if (scale === "week") {
+    segments = buildWeeks(start, end);
+  }
+
+  if (scale === "month") {
+    segments = buildMonths(start, end);
+  }
+
+  if (scale === "quarter") {
+    segments = buildQuarters(start, end);
+  }
+
+  /* Render segments */
+
+  segments.forEach(s => {
+
+    const div = document.createElement("div");
+    div.className = "segment";
+    div.textContent = s.label;
+
+    timeline.appendChild(div);
+
+  });
+
+  /* Bar */
+
+  const bar = document.createElement("div");
+  bar.className = "bar";
+
+  const total = end - start;
+  bar.style.width = "100%";
+
+  timeline.appendChild(bar);
+
+  /* Today line */
+
+  renderToday(start, end);
+}
+
+/* Time segments */
+
+function buildWeeks(start, end) {
+
+  let list = [];
+  let d = new Date(start);
+
+  while (d < end) {
+
+    const label =
+      "W" +
+      getWeek(d) +
+      " " +
+      d.getFullYear();
+
+    list.push({ label });
+
+    d.setDate(d.getDate() + 7);
+  }
+
+  return list;
+}
+
+function buildMonths(start, end) {
+
+  let list = [];
+  let d = new Date(start);
+
+  while (d < end) {
+
+    const label =
+      d.toLocaleString("default",{month:"short"}) +
+      " " +
+      d.getFullYear();
+
+    list.push({ label });
+
+    d.setMonth(d.getMonth() + 1);
+  }
+
+  return list;
+}
+
+function buildQuarters(start, end) {
+
+  let list = [];
+  let d = new Date(start);
+
+  while (d < end) {
+
+    const q = Math.floor(d.getMonth()/3)+1;
+
+    list.push({
+      label: "Q" + q + " " + d.getFullYear()
+    });
+
+    d.setMonth(d.getMonth() + 3);
+  }
+
+  return list;
+}
+
+/* Week number */
+
+function getWeek(d) {
+
+  d = new Date(Date.UTC(
+    d.getFullYear(),
+    d.getMonth(),
+    d.getDate()
+  ));
+
+  const yearStart =
+    new Date(Date.UTC(d.getUTCFullYear(),0,1));
+
+  const weekNo =
+    Math.ceil((((d - yearStart)/86400000)+1)/7);
+
+  return weekNo;
+}
+
+/* Today line */
+
+function renderToday(start, end) {
+
+  const now = new Date();
+
+  if (now < start || now > end) return;
+
+  const percent =
+    (now - start) / (end - start) * 100;
+
+  const line = document.createElement("div");
+  line.className = "today";
+
+  line.style.left = percent + "%";
+
+  const label = document.createElement("div");
+  label.className = "today-label";
+  label.textContent = "Today";
+
+  label.style.left = percent + "%";
+
+  timeline.appendChild(line);
+  timeline.appendChild(label);
+}
+
+/* Auto refresh every hour */
+
+setInterval(build, 1000 * 60 * 60);
+
+/* Initial */
+
+build();
+
+</script>
+
+</body>
+</html>
