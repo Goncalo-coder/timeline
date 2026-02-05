@@ -511,7 +511,7 @@
             
             let progress;
             if (scale === 'daily') {
-                // For daily scale, use working hours: 8 AM (8) to 11 PM (23) = 15 hours
+                // For daily scale, use working hours: 8 AM (8) to 9 PM (21) = 13 hours
                 const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1; // Include end date
                 
                 // Calculate which day we're in
@@ -519,7 +519,7 @@
                 todayMidnight.setHours(0, 0, 0, 0);
                 const daysPassed = Math.floor((todayMidnight - startDate) / (1000 * 60 * 60 * 24));
                 
-                // Calculate time within the current day (8 AM to 11 PM)
+                // Calculate time within the current day (8 AM to 9 PM)
                 const currentHour = today.getHours();
                 const currentMinute = today.getMinutes();
                 const currentSecond = today.getSeconds();
@@ -527,21 +527,21 @@
                 // Convert to decimal hours from start of day
                 const decimalHours = currentHour + (currentMinute / 60) + (currentSecond / 3600);
                 
-                // Calculate position within working hours (8 AM = 0, 11 PM = 15 hours)
+                // Calculate position within working hours (8 AM = 0, 9 PM = 13 hours)
                 let hoursIntoWorkday;
                 if (decimalHours < 8) {
                     // Before 8 AM - treat as start of workday
                     hoursIntoWorkday = 0;
-                } else if (decimalHours > 23) {
-                    // After 11 PM - treat as end of workday
-                    hoursIntoWorkday = 15;
+                } else if (decimalHours > 21) {
+                    // After 9 PM - treat as end of workday
+                    hoursIntoWorkday = 13;
                 } else {
                     // During working hours
                     hoursIntoWorkday = decimalHours - 8;
                 }
                 
                 // Position within the current day (0 to 1)
-                const dayProgress = hoursIntoWorkday / 15;
+                const dayProgress = hoursIntoWorkday / 13;
                 
                 // Total progress across all days
                 progress = ((daysPassed + dayProgress) / totalDays) * 100;
@@ -763,8 +763,9 @@
             const todayMidnight = new Date(today);
             todayMidnight.setHours(0, 0, 0, 0);
             
-            const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
-            const daysPassed = Math.max(0, Math.min(totalDays, Math.ceil((todayMidnight - startDate) / (1000 * 60 * 60 * 24))));
+            // Include both start and end dates in total
+            const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            const daysPassed = Math.max(0, Math.min(totalDays, Math.ceil((todayMidnight - startDate) / (1000 * 60 * 60 * 24)) + 1));
             const daysLeft = Math.max(0, totalDays - daysPassed);
             const percentComplete = Math.round((daysPassed / totalDays) * 100);
 
