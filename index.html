@@ -14,8 +14,8 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: #f5f5f7;
-            padding: 20px 10px;
-            min-height: 100vh;
+            padding: 10px;
+            margin: 0;
         }
 
         .container {
@@ -25,17 +25,17 @@
 
         .controls {
             background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            margin-bottom: 10px;
         }
 
         .control-group {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
         .control-item {
@@ -106,26 +106,26 @@
 
         .timeline-card {
             background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            margin-bottom: 10px;
         }
 
         .timeline-header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .timeline-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
             color: #1d1d1f;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .timeline-dates {
-            font-size: 12px;
+            font-size: 11px;
             color: #86868b;
             font-weight: 500;
         }
@@ -133,7 +133,7 @@
         .scale-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             padding: 0 5px;
         }
 
@@ -162,22 +162,24 @@
 
         .timeline-bar-container {
             position: relative;
-            margin: 15px 0;
+            margin: 10px 0;
         }
 
         .timeline-bar {
-            height: 40px;
-            background: #f5f5f7;
-            border-radius: 20px;
+            height: 35px;
+            background: #007AFF;
+            border-radius: 18px;
             position: relative;
             overflow: hidden;
-            display: flex;
         }
 
-        .timeline-segment {
-            flex: 1;
-            position: relative;
-            transition: background 0.3s ease;
+        .timeline-separator {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: rgba(255, 255, 255, 0.3);
+            z-index: 5;
         }
 
         @keyframes blink {
@@ -196,25 +198,15 @@
             z-index: 10;
             animation: blink 2s ease-in-out infinite;
         }
-
-        .timeline-grid {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        .grid-line {
-            flex: 1;
-            border-right: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .grid-line:last-child {
-            border-right: none;
+            top: -8px;
+            bottom: -8px;
+            width: 2px;
+            background: #FF3B30;
+            box-shadow: 0 0 6px rgba(255, 59, 48, 0.4);
+            transform: translateX(-50%);
+            z-index: 10;
+            animation: blink 2s ease-in-out infinite;
         }
 
         .today-label {
@@ -245,9 +237,9 @@
         .stats-section {
             display: flex;
             justify-content: center;
-            gap: 30px;
-            margin-top: 20px;
-            padding-top: 20px;
+            gap: 25px;
+            margin-top: 15px;
+            padding-top: 15px;
             border-top: 1px solid #e5e5e7;
         }
 
@@ -256,30 +248,30 @@
         }
 
         .stat-value {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             color: #1d1d1f;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
         .stat-label {
-            font-size: 11px;
+            font-size: 10px;
             color: #86868b;
             font-weight: 500;
         }
 
         .share-section {
             background: white;
-            padding: 15px 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 12px 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         }
 
         .share-label {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .share-input-group {
@@ -474,17 +466,19 @@
 
             // Apply colors
             document.body.style.background = bgColor;
+            const timelineBar = document.getElementById('timelineBar');
+            timelineBar.style.background = barColor;
             document.getElementById('todayIndicator').style.background = todayColor;
             document.querySelector('.today-label').style.color = todayColor;
-            document.getElementById('todayIndicator').style.boxShadow = `0 0 8px ${todayColor}66`;
+            document.getElementById('todayIndicator').style.boxShadow = `0 0 6px ${todayColor}66`;
 
             // Update display
             document.getElementById('displayTitle').textContent = title;
             document.getElementById('displayDates').textContent = 
                 `${formatDate(startDate)} - ${formatDate(endDate)}`;
 
-            // Generate scale and bar segments
-            generateScale(startDate, endDate, scale, barColor);
+            // Generate scale and separators
+            generateScale(startDate, endDate, scale);
 
             // Calculate progress
             const today = new Date();
@@ -523,43 +517,28 @@
             }, 100);
         }
 
-        function generateScale(startDate, endDate, scale, barColor) {
+        function generateScale(startDate, endDate, scale) {
             const scaleRow = document.getElementById('scaleRow');
             const barContainer = document.getElementById('timelineBar');
             scaleRow.innerHTML = '';
             barContainer.innerHTML = '';
 
-            // Calculate today's position for segment coloring
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
             if (scale === 'daily') {
-                generateDailyScale(startDate, endDate, today, scaleRow, barContainer, barColor);
+                generateDailyScale(startDate, endDate, scaleRow, barContainer);
             } else if (scale === 'weekly') {
-                generateWeeklyScale(startDate, endDate, today, scaleRow, barContainer, barColor);
+                generateWeeklyScale(startDate, endDate, scaleRow, barContainer);
             } else if (scale === 'monthly') {
-                generateMonthlyScale(startDate, endDate, today, scaleRow, barContainer, barColor);
+                generateMonthlyScale(startDate, endDate, scaleRow, barContainer);
             } else if (scale === 'quarterly') {
-                generateQuarterlyScale(startDate, endDate, today, scaleRow, barContainer, barColor);
+                generateQuarterlyScale(startDate, endDate, scaleRow, barContainer);
             }
-
-            // Add grid lines overlay
-            const gridOverlay = document.createElement('div');
-            gridOverlay.className = 'timeline-grid';
-            gridOverlay.id = 'gridOverlay';
-            const segments = barContainer.children.length;
-            for (let i = 0; i < segments; i++) {
-                const gridLine = document.createElement('div');
-                gridLine.className = 'grid-line';
-                gridOverlay.appendChild(gridLine);
-            }
-            barContainer.appendChild(gridOverlay);
         }
 
-        function generateDailyScale(startDate, endDate, today, scaleRow, barContainer, barColor) {
+        function generateDailyScale(startDate, endDate, scaleRow, barContainer) {
             const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
-            const lighterColor = adjustBrightness(barColor, 20);
-            const darkerColor = barColor;
             
             for (let i = 0; i <= days; i++) {
                 const date = new Date(startDate);
@@ -584,22 +563,18 @@
                 unit.appendChild(dateLabel);
                 scaleRow.appendChild(unit);
 
-                // Create bar segment - one per day
+                // Create separator line (except for last one)
                 if (i < days) {
-                    const segment = document.createElement('div');
-                    segment.className = 'timeline-segment';
-                    const segmentColor = i % 2 === 0 ? lighterColor : darkerColor;
-                    segment.style.background = segmentColor;
-                    
-                    barContainer.appendChild(segment);
+                    const separator = document.createElement('div');
+                    separator.className = 'timeline-separator';
+                    separator.style.left = ((i + 1) / days * 100) + '%';
+                    barContainer.appendChild(separator);
                 }
             }
         }
 
-        function generateWeeklyScale(startDate, endDate, today, scaleRow, barContainer, barColor) {
+        function generateWeeklyScale(startDate, endDate, scaleRow, barContainer) {
             const weeks = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24 * 7));
-            const lighterColor = adjustBrightness(barColor, 20);
-            const darkerColor = barColor;
             
             for (let i = 0; i <= weeks; i++) {
                 const date = new Date(startDate);
@@ -621,71 +596,73 @@
                 unit.appendChild(dateLabel);
                 scaleRow.appendChild(unit);
 
-                // Create bar segment - one per week
+                // Create separator line (except for last one)
                 if (i < weeks) {
-                    const segment = document.createElement('div');
-                    segment.className = 'timeline-segment';
-                    const segmentColor = i % 2 === 0 ? lighterColor : darkerColor;
-                    segment.style.background = segmentColor;
-                    
-                    barContainer.appendChild(segment);
+                    const separator = document.createElement('div');
+                    separator.className = 'timeline-separator';
+                    separator.style.left = ((i + 1) / weeks * 100) + '%';
+                    barContainer.appendChild(separator);
                 }
             }
         }
 
-        function generateMonthlyScale(startDate, endDate, today, scaleRow, barContainer, barColor) {
+        function generateMonthlyScale(startDate, endDate, scaleRow, barContainer) {
             let current = new Date(startDate);
-            let count = 0;
-            const lighterColor = adjustBrightness(barColor, 20);
-            const darkerColor = barColor;
+            const months = [];
             
+            // Calculate all months
             while (current <= endDate) {
+                months.push(new Date(current));
+                current.setMonth(current.getMonth() + 1);
+            }
+            
+            const totalMonths = months.length;
+            
+            months.forEach((date, i) => {
                 // Create scale unit
                 const unit = document.createElement('div');
                 unit.className = 'scale-unit';
                 
                 const label = document.createElement('div');
                 label.className = 'scale-label';
-                label.textContent = current.toLocaleDateString('en-US', { month: 'short' });
+                label.textContent = date.toLocaleDateString('en-US', { month: 'short' });
                 
                 const dateLabel = document.createElement('div');
                 dateLabel.className = 'scale-date';
-                dateLabel.textContent = current.getFullYear();
+                dateLabel.textContent = date.getFullYear();
                 
                 unit.appendChild(label);
                 unit.appendChild(dateLabel);
                 scaleRow.appendChild(unit);
                 
-                // Create bar segment - one per month
-                const nextMonth = new Date(current);
-                nextMonth.setMonth(nextMonth.getMonth() + 1);
-                
-                if (nextMonth <= endDate || count === 0) {
-                    const segment = document.createElement('div');
-                    segment.className = 'timeline-segment';
-                    const segmentColor = count % 2 === 0 ? lighterColor : darkerColor;
-                    segment.style.background = segmentColor;
-                    
-                    barContainer.appendChild(segment);
+                // Create separator line (except for last one)
+                if (i < totalMonths - 1) {
+                    const separator = document.createElement('div');
+                    separator.className = 'timeline-separator';
+                    separator.style.left = ((i + 1) / totalMonths * 100) + '%';
+                    barContainer.appendChild(separator);
                 }
-                
-                current.setMonth(current.getMonth() + 1);
-                count++;
-            }
+            });
         }
 
-        function generateQuarterlyScale(startDate, endDate, today, scaleRow, barContainer, barColor) {
+        function generateQuarterlyScale(startDate, endDate, scaleRow, barContainer) {
             let current = new Date(startDate);
-            let count = 0;
-            const lighterColor = adjustBrightness(barColor, 20);
-            const darkerColor = barColor;
+            const quarters = [];
             
+            // Calculate all quarters
             while (current <= endDate) {
+                quarters.push(new Date(current));
+                current.setMonth(current.getMonth() + 3);
+            }
+            
+            const totalQuarters = quarters.length;
+            
+            quarters.forEach((date, i) => {
                 // Create scale unit
                 const unit = document.createElement('div');
                 unit.className = 'scale-unit';
                 
-                const quarter = Math.floor(current.getMonth() / 3) + 1;
+                const quarter = Math.floor(date.getMonth() / 3) + 1;
                 
                 const label = document.createElement('div');
                 label.className = 'scale-label';
@@ -693,28 +670,20 @@
                 
                 const dateLabel = document.createElement('div');
                 dateLabel.className = 'scale-date';
-                dateLabel.textContent = current.getFullYear();
+                dateLabel.textContent = date.getFullYear();
                 
                 unit.appendChild(label);
                 unit.appendChild(dateLabel);
                 scaleRow.appendChild(unit);
                 
-                // Create bar segment - one per quarter
-                const nextQuarter = new Date(current);
-                nextQuarter.setMonth(nextQuarter.getMonth() + 3);
-                
-                if (nextQuarter <= endDate || count === 0) {
-                    const segment = document.createElement('div');
-                    segment.className = 'timeline-segment';
-                    const segmentColor = count % 2 === 0 ? lighterColor : darkerColor;
-                    segment.style.background = segmentColor;
-                    
-                    barContainer.appendChild(segment);
+                // Create separator line (except for last one)
+                if (i < totalQuarters - 1) {
+                    const separator = document.createElement('div');
+                    separator.className = 'timeline-separator';
+                    separator.style.left = ((i + 1) / totalQuarters * 100) + '%';
+                    barContainer.appendChild(separator);
                 }
-                
-                current.setMonth(current.getMonth() + 3);
-                count++;
-            }
+            });
         }
 
         function updateStats(startDate, endDate, today, scale) {
