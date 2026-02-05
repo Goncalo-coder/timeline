@@ -352,11 +352,11 @@
                 </div>
                 <div class="control-item">
                     <label for="startDate">Start Date</label>
-                    <input type="date" id="startDate" onkeydown="return false">
+                    <input type="date" id="startDate" onkeydown="return false" lang="en-GB">
                 </div>
                 <div class="control-item">
                     <label for="endDate">End Date</label>
-                    <input type="date" id="endDate" onkeydown="return false">
+                    <input type="date" id="endDate" onkeydown="return false" lang="en-GB">
                 </div>
                 <div class="control-item">
                     <label for="scale">Scale</label>
@@ -512,7 +512,7 @@
             let progress;
             if (scale === 'daily') {
                 // For daily scale, use working hours: 8 AM (8) to 11 PM (23) = 15 hours
-                const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+                const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1; // Include end date
                 
                 // Calculate which day we're in
                 const todayMidnight = new Date(today);
@@ -604,7 +604,7 @@
         }
 
         function generateDailyScale(startDate, endDate, scaleRow, barContainer) {
-            const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+            const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1; // Include end date
             
             for (let i = 0; i < days; i++) {
                 const date = new Date(startDate);
@@ -630,7 +630,7 @@
                 scaleRow.appendChild(unit);
             }
 
-            // Create separator lines (one less than scale units)
+            // Create separator lines
             for (let i = 1; i < days; i++) {
                 const separator = document.createElement('div');
                 separator.className = 'timeline-separator';
@@ -640,11 +640,16 @@
         }
 
         function generateWeeklyScale(startDate, endDate, scaleRow, barContainer) {
-            const weeks = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24 * 7));
+            // Calculate weeks including the end date
+            const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            const weeks = Math.ceil(totalDays / 7);
             
             for (let i = 0; i < weeks; i++) {
                 const date = new Date(startDate);
                 date.setDate(date.getDate() + (i * 7));
+                
+                // Don't show weeks that start after the end date
+                if (date > endDate) break;
                 
                 // Create scale unit (centered between lines)
                 const unit = document.createElement('div');
@@ -663,11 +668,12 @@
                 scaleRow.appendChild(unit);
             }
 
-            // Create separator lines (one less than scale units)
-            for (let i = 1; i < weeks; i++) {
+            // Create separator lines
+            const actualWeeks = scaleRow.children.length;
+            for (let i = 1; i < actualWeeks; i++) {
                 const separator = document.createElement('div');
                 separator.className = 'timeline-separator';
-                separator.style.left = (i / weeks * 100) + '%';
+                separator.style.left = (i / actualWeeks * 100) + '%';
                 barContainer.appendChild(separator);
             }
         }
@@ -676,7 +682,7 @@
             let current = new Date(startDate);
             const months = [];
             
-            // Calculate all months
+            // Calculate all months including end date
             while (current <= endDate) {
                 months.push(new Date(current));
                 current.setMonth(current.getMonth() + 1);
@@ -702,7 +708,7 @@
                 scaleRow.appendChild(unit);
             });
 
-            // Create separator lines (one less than scale units)
+            // Create separator lines
             for (let i = 1; i < totalMonths; i++) {
                 const separator = document.createElement('div');
                 separator.className = 'timeline-separator';
@@ -715,7 +721,7 @@
             let current = new Date(startDate);
             const quarters = [];
             
-            // Calculate all quarters
+            // Calculate all quarters including end date
             while (current <= endDate) {
                 quarters.push(new Date(current));
                 current.setMonth(current.getMonth() + 3);
@@ -743,7 +749,7 @@
                 scaleRow.appendChild(unit);
             });
 
-            // Create separator lines (one less than scale units)
+            // Create separator lines
             for (let i = 1; i < totalQuarters; i++) {
                 const separator = document.createElement('div');
                 separator.className = 'timeline-separator';
