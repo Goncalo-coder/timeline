@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #f5f5f7;
+            background: white;
             padding: 10px;
             margin: 0;
         }
@@ -24,10 +24,10 @@
         }
 
         .controls {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            background: transparent;
+            padding: 15px 0;
+            border-radius: 0;
+            box-shadow: none;
             margin-bottom: 10px;
         }
 
@@ -105,10 +105,10 @@
         }
 
         .timeline-card {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            background: transparent;
+            padding: 15px 0;
+            border-radius: 0;
+            box-shadow: none;
             margin-bottom: 10px;
             cursor: pointer;
             transition: transform 0.2s;
@@ -116,7 +116,7 @@
         }
 
         .timeline-card:hover {
-            box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+            box-shadow: none;
         }
 
         .timeline-card.size-small {
@@ -286,10 +286,10 @@
         }
 
         .share-section {
-            background: white;
-            padding: 12px 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            background: transparent;
+            padding: 12px 0;
+            border-radius: 0;
+            box-shadow: none;
         }
 
         .share-label {
@@ -372,11 +372,15 @@
             <div class="control-group">
                 <div class="control-item">
                     <label for="bgColor">Background Color</label>
-                    <input type="color" id="bgColor" value="#f5f5f7">
+                    <input type="color" id="bgColor" value="#ffffff">
                 </div>
                 <div class="control-item">
                     <label for="barColor">Timeline Bar Color</label>
                     <input type="color" id="barColor" value="#007AFF">
+                </div>
+                <div class="control-item">
+                    <label for="separatorColor">Separator Line Color</label>
+                    <input type="color" id="separatorColor" value="#ffffff">
                 </div>
                 <div class="control-item">
                     <label for="todayColor">Today Line Color</label>
@@ -455,6 +459,9 @@
                 if (params.has('barColor')) {
                     document.getElementById('barColor').value = params.get('barColor');
                 }
+                if (params.has('separatorColor')) {
+                    document.getElementById('separatorColor').value = params.get('separatorColor');
+                }
                 if (params.has('todayColor')) {
                     document.getElementById('todayColor').value = params.get('todayColor');
                 }
@@ -478,6 +485,7 @@
             const scale = document.getElementById('scale').value;
             const bgColor = document.getElementById('bgColor').value;
             const barColor = document.getElementById('barColor').value;
+            const separatorColor = document.getElementById('separatorColor').value;
             const todayColor = document.getElementById('todayColor').value;
 
             if (isNaN(startDate) || isNaN(endDate)) {
@@ -497,6 +505,9 @@
             document.getElementById('todayIndicator').style.background = todayColor;
             document.querySelector('.today-label').style.color = todayColor;
             document.getElementById('todayIndicator').style.boxShadow = `0 0 6px ${todayColor}66`;
+
+            // Store separator color for use in scale generation
+            window.currentSeparatorColor = separatorColor;
 
             // Update display
             document.getElementById('displayTitle').textContent = title;
@@ -570,6 +581,7 @@
             url.searchParams.set('scale', scale);
             url.searchParams.set('bgColor', bgColor);
             url.searchParams.set('barColor', barColor);
+            url.searchParams.set('separatorColor', separatorColor);
             url.searchParams.set('todayColor', todayColor);
 
             document.getElementById('shareUrl').value = url.toString();
@@ -635,6 +647,7 @@
                 const separator = document.createElement('div');
                 separator.className = 'timeline-separator';
                 separator.style.left = (i / days * 100) + '%';
+                separator.style.background = window.currentSeparatorColor || 'rgba(255, 255, 255, 0.3)';
                 barContainer.appendChild(separator);
             }
         }
@@ -674,6 +687,7 @@
                 const separator = document.createElement('div');
                 separator.className = 'timeline-separator';
                 separator.style.left = (i / actualWeeks * 100) + '%';
+                separator.style.background = window.currentSeparatorColor || 'rgba(255, 255, 255, 0.3)';
                 barContainer.appendChild(separator);
             }
         }
@@ -713,6 +727,7 @@
                 const separator = document.createElement('div');
                 separator.className = 'timeline-separator';
                 separator.style.left = (i / totalMonths * 100) + '%';
+                separator.style.background = window.currentSeparatorColor || 'rgba(255, 255, 255, 0.3)';
                 barContainer.appendChild(separator);
             }
         }
@@ -754,6 +769,7 @@
                 const separator = document.createElement('div');
                 separator.className = 'timeline-separator';
                 separator.style.left = (i / totalQuarters * 100) + '%';
+                separator.style.background = window.currentSeparatorColor || 'rgba(255, 255, 255, 0.3)';
                 barContainer.appendChild(separator);
             }
         }
@@ -835,8 +851,9 @@
             document.getElementById('startDate').value = today.toISOString().split('T')[0];
             document.getElementById('endDate').value = threeMonthsLater.toISOString().split('T')[0];
             document.getElementById('scale').value = 'weekly';
-            document.getElementById('bgColor').value = '#f5f5f7';
+            document.getElementById('bgColor').value = '#ffffff';
             document.getElementById('barColor').value = '#007AFF';
+            document.getElementById('separatorColor').value = '#ffffff';
             document.getElementById('todayColor').value = '#FF3B30';
             document.getElementById('timelineDisplay').style.display = 'none';
             
