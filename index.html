@@ -110,6 +110,40 @@
             border-radius: 10px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.08);
             margin-bottom: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        .timeline-card:hover {
+            box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+        }
+
+        .timeline-card.size-small {
+            transform: scale(0.75);
+            transform-origin: top center;
+        }
+
+        .timeline-card.size-medium {
+            transform: scale(1);
+        }
+
+        .timeline-card.size-large {
+            transform: scale(1.25);
+            transform-origin: top center;
+        }
+
+        .size-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 122, 255, 0.1);
+            color: #007AFF;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            pointer-events: none;
         }
 
         .timeline-header {
@@ -132,14 +166,16 @@
 
         .scale-row {
             display: flex;
-            justify-content: space-between;
+            justify-content: space-around;
             margin-bottom: 10px;
             padding: 0 5px;
+            position: relative;
         }
 
         .scale-unit {
             text-align: center;
             flex: 1;
+            position: relative;
         }
 
         .scale-label {
@@ -366,7 +402,8 @@
         </div>
 
         <div id="timelineDisplay" style="display: none;">
-            <div class="timeline-card" id="timelineCard">
+            <div class="timeline-card" id="timelineCard" onclick="cycleCardSize()">
+                <div class="size-indicator" id="sizeIndicator">Medium</div>
                 <div class="timeline-header">
                     <div class="timeline-title" id="displayTitle">Timeline Title</div>
                     <div class="timeline-dates" id="displayDates">Jan 1, 2024 - Dec 31, 2024</div>
@@ -540,11 +577,11 @@
         function generateDailyScale(startDate, endDate, scaleRow, barContainer) {
             const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
             
-            for (let i = 0; i <= days; i++) {
+            for (let i = 0; i < days; i++) {
                 const date = new Date(startDate);
                 date.setDate(date.getDate() + i);
                 
-                // Create scale unit
+                // Create scale unit (centered between lines)
                 const unit = document.createElement('div');
                 unit.className = 'scale-unit';
                 if (date.getDay() === 0 || date.getDay() === 6) {
@@ -562,25 +599,25 @@
                 unit.appendChild(label);
                 unit.appendChild(dateLabel);
                 scaleRow.appendChild(unit);
+            }
 
-                // Create separator line (except for last one)
-                if (i < days) {
-                    const separator = document.createElement('div');
-                    separator.className = 'timeline-separator';
-                    separator.style.left = ((i + 1) / days * 100) + '%';
-                    barContainer.appendChild(separator);
-                }
+            // Create separator lines (one less than scale units)
+            for (let i = 1; i < days; i++) {
+                const separator = document.createElement('div');
+                separator.className = 'timeline-separator';
+                separator.style.left = (i / days * 100) + '%';
+                barContainer.appendChild(separator);
             }
         }
 
         function generateWeeklyScale(startDate, endDate, scaleRow, barContainer) {
             const weeks = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24 * 7));
             
-            for (let i = 0; i <= weeks; i++) {
+            for (let i = 0; i < weeks; i++) {
                 const date = new Date(startDate);
                 date.setDate(date.getDate() + (i * 7));
                 
-                // Create scale unit
+                // Create scale unit (centered between lines)
                 const unit = document.createElement('div');
                 unit.className = 'scale-unit';
                 
@@ -595,14 +632,14 @@
                 unit.appendChild(label);
                 unit.appendChild(dateLabel);
                 scaleRow.appendChild(unit);
+            }
 
-                // Create separator line (except for last one)
-                if (i < weeks) {
-                    const separator = document.createElement('div');
-                    separator.className = 'timeline-separator';
-                    separator.style.left = ((i + 1) / weeks * 100) + '%';
-                    barContainer.appendChild(separator);
-                }
+            // Create separator lines (one less than scale units)
+            for (let i = 1; i < weeks; i++) {
+                const separator = document.createElement('div');
+                separator.className = 'timeline-separator';
+                separator.style.left = (i / weeks * 100) + '%';
+                barContainer.appendChild(separator);
             }
         }
 
@@ -618,8 +655,8 @@
             
             const totalMonths = months.length;
             
+            // Create scale units (centered between lines)
             months.forEach((date, i) => {
-                // Create scale unit
                 const unit = document.createElement('div');
                 unit.className = 'scale-unit';
                 
@@ -634,15 +671,15 @@
                 unit.appendChild(label);
                 unit.appendChild(dateLabel);
                 scaleRow.appendChild(unit);
-                
-                // Create separator line (except for last one)
-                if (i < totalMonths - 1) {
-                    const separator = document.createElement('div');
-                    separator.className = 'timeline-separator';
-                    separator.style.left = ((i + 1) / totalMonths * 100) + '%';
-                    barContainer.appendChild(separator);
-                }
             });
+
+            // Create separator lines (one less than scale units)
+            for (let i = 1; i < totalMonths; i++) {
+                const separator = document.createElement('div');
+                separator.className = 'timeline-separator';
+                separator.style.left = (i / totalMonths * 100) + '%';
+                barContainer.appendChild(separator);
+            }
         }
 
         function generateQuarterlyScale(startDate, endDate, scaleRow, barContainer) {
@@ -657,8 +694,8 @@
             
             const totalQuarters = quarters.length;
             
+            // Create scale units (centered between lines)
             quarters.forEach((date, i) => {
-                // Create scale unit
                 const unit = document.createElement('div');
                 unit.className = 'scale-unit';
                 
@@ -675,15 +712,15 @@
                 unit.appendChild(label);
                 unit.appendChild(dateLabel);
                 scaleRow.appendChild(unit);
-                
-                // Create separator line (except for last one)
-                if (i < totalQuarters - 1) {
-                    const separator = document.createElement('div');
-                    separator.className = 'timeline-separator';
-                    separator.style.left = ((i + 1) / totalQuarters * 100) + '%';
-                    barContainer.appendChild(separator);
-                }
             });
+
+            // Create separator lines (one less than scale units)
+            for (let i = 1; i < totalQuarters; i++) {
+                const separator = document.createElement('div');
+                separator.className = 'timeline-separator';
+                separator.style.left = (i / totalQuarters * 100) + '%';
+                barContainer.appendChild(separator);
+            }
         }
 
         function updateStats(startDate, endDate, today, scale) {
@@ -765,6 +802,59 @@
             
             window.history.pushState({}, '', window.location.pathname);
         }
+
+        function cycleCardSize() {
+            const card = document.getElementById('timelineCard');
+            const indicator = document.getElementById('sizeIndicator');
+            
+            // Get current size or default to medium
+            let currentSize = card.getAttribute('data-size') || 'medium';
+            
+            // Cycle through sizes: medium -> large -> small -> medium
+            let newSize;
+            if (currentSize === 'medium') {
+                newSize = 'large';
+            } else if (currentSize === 'large') {
+                newSize = 'small';
+            } else {
+                newSize = 'medium';
+            }
+            
+            // Remove all size classes
+            card.classList.remove('size-small', 'size-medium', 'size-large');
+            
+            // Add new size class
+            card.classList.add('size-' + newSize);
+            card.setAttribute('data-size', newSize);
+            
+            // Update indicator text
+            indicator.textContent = newSize.charAt(0).toUpperCase() + newSize.slice(1);
+            
+            // Save to URL if timeline is displayed
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('title')) {
+                urlParams.set('size', newSize);
+                const newUrl = window.location.pathname + '?' + urlParams.toString();
+                window.history.replaceState({}, '', newUrl);
+            }
+        }
+
+        // Load size from URL on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const size = urlParams.get('size');
+            if (size && ['small', 'medium', 'large'].includes(size)) {
+                const card = document.getElementById('timelineCard');
+                const indicator = document.getElementById('sizeIndicator');
+                card.classList.add('size-' + size);
+                card.setAttribute('data-size', size);
+                indicator.textContent = size.charAt(0).toUpperCase() + size.slice(1);
+            } else {
+                // Default to medium
+                document.getElementById('timelineCard').classList.add('size-medium');
+                document.getElementById('timelineCard').setAttribute('data-size', 'medium');
+            }
+        });
 
         // Auto-refresh every hour to keep "today" accurate
         setInterval(() => {
