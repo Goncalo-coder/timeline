@@ -1,540 +1,808 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<title>Timeline Builder</title>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f7;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
 
-<style>
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
 
-:root{
-  --bg:#0f172a;
-  --bar:#6366f1;
-  --line:#ff0000;
-  --card:#020617;
-  --text:#e5e7eb;
-  --muted:#94a3b8;
-}
+        .controls {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
 
-*{
-  box-sizing:border-box;
-  font-family:system-ui,sans-serif;
-}
+        .control-group {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
 
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-}
+        .control-item {
+            display: flex;
+            flex-direction: column;
+        }
 
-.app{
-  max-width:1200px;
-  margin:auto;
-  padding:30px 20px;
-}
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
 
-/* ================= CONTROLS ================= */
+        input[type="text"],
+        input[type="date"],
+        input[type="color"],
+        select {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
 
-.controls{
-  background:var(--card);
-  padding:20px;
-  border-radius:12px;
-  margin-bottom:25px;
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #007AFF;
+        }
 
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:15px;
-}
+        input[type="color"] {
+            height: 42px;
+            cursor: pointer;
+        }
 
-.controls label{
-  font-size:12px;
-  color:var(--muted);
-  display:block;
-  margin-bottom:4px;
-}
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
 
-.controls input,
-.controls select,
-.controls button{
-  padding:10px;
-  border-radius:6px;
-  border:none;
-  font-size:14px;
-  width:100%;
-}
+        button {
+            padding: 12px 24px;
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
 
-.controls button{
-  background:var(--bar);
-  color:white;
-  cursor:pointer;
-}
+        button:hover {
+            background: #0051D5;
+        }
 
-/* ================= CARD ================= */
+        button.secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
 
-.card{
-  background:var(--card);
-  border-radius:16px;
-  padding:25px;
-}
+        button.secondary:hover {
+            background: #e0e0e0;
+        }
 
-/* ================= HEADER ================= */
+        .timeline-card {
+            background: white;
+            padding: 50px;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
 
-.header{
-  text-align:center;
-  margin-bottom:20px;
-}
+        .timeline-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
 
-.header h1{
-  margin:0;
-  font-size:26px;
-}
+        .timeline-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1d1d1f;
+            margin-bottom: 12px;
+        }
 
-.header p{
-  margin:5px 0 0;
-  color:var(--muted);
-}
+        .timeline-dates {
+            font-size: 16px;
+            color: #86868b;
+            font-weight: 500;
+        }
 
-/* ================= SCALE ================= */
+        .scale-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
 
-.scale-row{
-  display:flex;
-  font-size:12px;
-  color:#c7d2fe;
-  margin-bottom:6px;
-}
+        .scale-unit {
+            text-align: center;
+            flex: 1;
+        }
 
-.scale-item{
-  flex:1;
-  text-align:center;
-  border-right:1px solid #1e293b;
-  padding-bottom:6px;
-}
+        .scale-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 4px;
+        }
 
-.scale-item small{
-  display:block;
-  font-size:11px;
-  color:#94a3b8;
-  margin-top:2px;
-}
+        .scale-date {
+            font-size: 12px;
+            color: #86868b;
+        }
 
-.scale-item:last-child{
-  border:none;
-}
+        .scale-separator {
+            width: 1px;
+            background: #e5e5e7;
+            margin: 0 10px;
+        }
 
-/* ================= BAR ================= */
+        .timeline-bar-container {
+            position: relative;
+            margin: 30px 0;
+        }
 
-.bar-wrapper{
-  position:relative;
-  background:white;
-  border-radius:18px;
-  overflow:hidden;
-  height:42px;
-}
+        .timeline-bar {
+            height: 60px;
+            background: #f5f5f7;
+            border-radius: 30px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+        }
 
-/* Grid */
+        .timeline-segment {
+            flex: 1;
+            position: relative;
+            transition: background 0.3s ease;
+        }
 
-.grid{
-  position:absolute;
-  inset:0;
-  display:flex;
-  z-index:1;
-}
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
 
-.grid div{
-  flex:1;
-  border-right:1px solid #e5e7eb;
-}
+        .today-indicator {
+            position: absolute;
+            top: -10px;
+            bottom: -10px;
+            width: 3px;
+            background: #FF3B30;
+            box-shadow: 0 0 8px rgba(255, 59, 48, 0.4);
+            transform: translateX(-50%);
+            z-index: 10;
+            animation: blink 2s ease-in-out infinite;
+        }
 
-.grid div:last-child{
-  border:none;
-}
+        .timeline-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            pointer-events: none;
+            z-index: 5;
+        }
 
-/* Bar */
+        .grid-line {
+            flex: 1;
+            border-right: 1px solid rgba(255, 255, 255, 0.3);
+        }
 
-.bar{
-  position:absolute;
-  inset:0;
-  background:var(--bar);
-  z-index:2;
-}
+        .grid-line:last-child {
+            border-right: none;
+        }
 
-/* ================= TODAY LINE ================= */
+        .today-label {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #FF3B30;
+            white-space: nowrap;
+        }
 
-.today{
-  position:absolute;
-  top:-20px;
-  bottom:-20px;
-  width:4px;
-  background:var(--line);
-  box-shadow:0 0 12px var(--line);
-  z-index:5;
-}
+        .timeline-endpoints {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+            margin-top: 12px;
+        }
 
-.today-label{
-  position:absolute;
-  top:-26px;
-  transform:translateX(-50%);
-  font-size:12px;
-  font-weight:600;
-  color:var(--line);
-}
+        .endpoint {
+            font-size: 13px;
+            color: #86868b;
+            font-weight: 500;
+        }
 
-/* ================= STATS ================= */
+        .stats-section {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 50px;
+            padding-top: 40px;
+            border-top: 1px solid #e5e5e7;
+        }
 
-.stats{
-  display:flex;
-  justify-content:space-around;
-  margin-top:25px;
-  text-align:center;
-}
+        .stat-item {
+            text-align: center;
+        }
 
-.stat strong{
-  font-size:26px;
-  display:block;
-}
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+        }
 
-.stat span{
-  font-size:13px;
-  color:var(--muted);
-}
+        .stat-label {
+            font-size: 14px;
+            color: #86868b;
+            font-weight: 500;
+        }
 
-/* ================= SHARE ================= */
+        .share-section {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
 
-.share{
-  margin-top:25px;
-  text-align:center;
-}
+        .share-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
 
-.share input{
-  width:100%;
-  padding:10px;
-  border-radius:6px;
-  border:none;
-  background:#020617;
-  color:white;
-  margin-bottom:10px;
-}
+        .share-input-group {
+            display: flex;
+            gap: 12px;
+        }
 
-.share button{
-  padding:8px 14px;
-  border:none;
-  border-radius:6px;
-  background:var(--bar);
-  color:white;
-  cursor:pointer;
-}
+        .share-input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 13px;
+            background: #f9f9f9;
+            font-family: monospace;
+        }
 
-</style>
+        .weekend {
+            background: #f9f9fb;
+        }
+
+        @media (max-width: 768px) {
+            .timeline-card {
+                padding: 30px 20px;
+            }
+
+            .stats-section {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .control-group {
+                grid-template-columns: 1fr;
+            }
+
+            .scale-label {
+                font-size: 12px;
+            }
+
+            .scale-date {
+                font-size: 10px;
+            }
+        }
+    </style>
 </head>
-
 <body>
-
-<div class="app">
-
-<!-- CONTROLS -->
-
-<div class="controls">
-
-<div>
-<label>Title</label>
-<input id="title">
-</div>
-
-<div>
-<label>Start</label>
-<input type="date" id="start">
-</div>
-
-<div>
-<label>End</label>
-<input type="date" id="end">
-</div>
-
-<div>
-<label>Scale</label>
-<select id="scale">
-  <option value="day">Daily</option>
-  <option value="week">Weekly</option>
-</select>
-</div>
-
-<div>
-<label>Background</label>
-<input type="color" id="bg">
-</div>
-
-<div>
-<label>Bar</label>
-<input type="color" id="bar">
-</div>
-
-<div>
-<label>Today Line</label>
-<input type="color" id="line">
-</div>
-
-<button onclick="generate()">Generate</button>
-
-</div>
-
-<!-- CARD -->
-
-<div class="card">
-
-<div class="header">
-  <h1 id="viewTitle"></h1>
-  <p id="viewDates"></p>
-</div>
-
-<div class="scale-row" id="scaleRow"></div>
-
-<div class="bar-wrapper">
-
-  <div class="grid" id="grid"></div>
-
-  <div class="bar"></div>
-
-  <div class="today" id="todayLine"></div>
-  <div class="today-label" id="todayLabel">Today</div>
-
-</div>
-
-<div class="stats">
-
-<div class="stat">
-  <strong id="total"></strong>
-  <span id="unitLabel"></span>
-</div>
-
-<div class="stat">
-  <strong id="percent"></strong>
-  <span>Complete</span>
-</div>
-
-<div class="stat">
-  <strong id="left"></strong>
-  <span>Left</span>
-</div>
-
-</div>
-
-<div class="share">
-
-<p>Shareable URL</p>
-
-<input id="shareLink" readonly>
-
-<button onclick="copyLink()">Copy Link</button>
-
-</div>
-
-</div>
-
-</div>
-
-<script>
-
-/* Helpers */
-
-function qs(k){
-  return new URLSearchParams(location.search).get(k);
-}
-
-function format(d){
-  return d.toISOString().split("T")[0];
-}
-
-function diffDays(a,b){
-  return Math.ceil((b-a)/86400000);
-}
-
-/* Defaults */
-
-const now=new Date();
-
-const defaults={
-  title:"My Timeline",
-  start:format(now),
-  end:format(new Date(now.getFullYear(),now.getMonth()+3,now.getDate())),
-  scale:"week",
-  bg:"#0f172a",
-  bar:"#6366f1",
-  line:"#ff0000"
-};
-
-/* Init */
-
-const cfg={
-  title:qs("title")||defaults.title,
-  start:qs("start")||defaults.start,
-  end:qs("end")||defaults.end,
-  scale:qs("scale")||defaults.scale,
-  bg:qs("bg")||defaults.bg,
-  bar:qs("bar")||defaults.bar,
-  line:qs("line")||defaults.line
-};
-
-document.body.style.background=cfg.bg;
-document.documentElement.style.setProperty("--bar",cfg.bar);
-document.documentElement.style.setProperty("--line",cfg.line);
-
-/* Fill */
-
-title.value=cfg.title;
-start.value=cfg.start;
-end.value=cfg.end;
-scale.value=cfg.scale;
-bg.value=cfg.bg;
-bar.value=cfg.bar;
-line.value=cfg.line;
-
-build();
-
-/* Build */
-
-function build(){
-
-  const s=new Date(start.value);
-  const e=new Date(end.value);
-  const n=new Date();
-
-  viewTitle.textContent=title.value;
-  viewDates.textContent=
-    s.toDateString()+" — "+e.toDateString();
-
-  renderScale(s,e,scale.value,n);
-  renderGrid();
-
-  const totalDays=diffDays(s,e);
-  const done=Math.min(totalDays,Math.max(0,diffDays(s,n)));
-  const pct=Math.round(done/totalDays*100);
-
-  if(n>=s&&n<=e){
-
-    const p=done/totalDays*100;
-
-    todayLine.style.left=p+"%";
-    todayLabel.style.left=p+"%";
-
-  }else{
-    todayLine.style.display="none";
-    todayLabel.style.display="none";
-  }
-
-  let units;
-
-  if(scale.value==="day"){
-    units=totalDays;
-    unitLabel.textContent="Total Days";
-  }
-
-  if(scale.value==="week"){
-    units=Math.ceil(totalDays/7);
-    unitLabel.textContent="Total Weeks";
-  }
-
-  total.textContent=units;
-  percent.textContent=pct+"%";
-  left.textContent=Math.max(0,units-Math.round(units*pct/100));
-
-  updateShare();
-}
-
-/* Scale */
-
-function renderScale(s,e,type,now){
-
-  scaleRow.innerHTML="";
-
-  let d=new Date(s);
-  let i=1;
-
-  while(d<e){
-
-    const div=document.createElement("div");
-    div.className="scale-item";
-
-    if(type==="day"){
-
-      div.innerHTML=
-        d.toLocaleDateString("en",{weekday:"short"})+
-        "<small>"+d.getDate()+"</small>";
-
-      d.setDate(d.getDate()+1);
-    }
-
-    if(type==="week"){
-
-      const label="W"+i;
-
-      const dateLabel=
-        d.toLocaleDateString("en",{month:"short",day:"numeric"});
-
-      div.innerHTML=
-        label+
-        "<small>"+dateLabel+"</small>";
-
-      d.setDate(d.getDate()+7);
-      i++;
-    }
-
-    scaleRow.appendChild(div);
-  }
-}
-
-/* Grid */
-
-function renderGrid(){
-
-  grid.innerHTML="";
-
-  const count=scaleRow.children.length;
-
-  for(let i=0;i<count;i++){
-    const d=document.createElement("div");
-    grid.appendChild(d);
-  }
-}
-
-/* URL */
-
-function updateShare(){
-
-  const url=
-    location.origin+
-    location.pathname+
-    `?title=${encodeURIComponent(title.value)}`+
-    `&start=${start.value}`+
-    `&end=${end.value}`+
-    `&scale=${scale.value}`+
-    `&bg=${bg.value.replace("#","%23")}`+
-    `&bar=${bar.value.replace("#","%23")}`+
-    `&line=${line.value.replace("#","%23")}`;
-
-  shareLink.value=url;
-}
-
-/* Generate */
-
-function generate(){
-  updateShare();
-  location.href=shareLink.value;
-}
-
-/* Copy */
-
-function copyLink(){
-  shareLink.select();
-  document.execCommand("copy");
-  alert("Copied");
-}
-
-/* Auto refresh */
-
-setInterval(build,3600000);
-
-</script>
-
+    <div class="container">
+        <div class="controls">
+            <div class="control-group">
+                <div class="control-item">
+                    <label for="titleInput">Timeline Title</label>
+                    <input type="text" id="titleInput" placeholder="My Project Timeline">
+                </div>
+                <div class="control-item">
+                    <label for="startDate">Start Date</label>
+                    <input type="date" id="startDate" onkeydown="return false">
+                </div>
+                <div class="control-item">
+                    <label for="endDate">End Date</label>
+                    <input type="date" id="endDate" onkeydown="return false">
+                </div>
+                <div class="control-item">
+                    <label for="scale">Scale</label>
+                    <select id="scale">
+                        <option value="daily">Daily (1-14 days)</option>
+                        <option value="weekly" selected>Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="quarterly">Quarterly</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <div class="control-item">
+                    <label for="bgColor">Background Color</label>
+                    <input type="color" id="bgColor" value="#f5f5f7">
+                </div>
+                <div class="control-item">
+                    <label for="barColor">Timeline Bar Color</label>
+                    <input type="color" id="barColor" value="#007AFF">
+                </div>
+                <div class="control-item">
+                    <label for="todayColor">Today Line Color</label>
+                    <input type="color" id="todayColor" value="#FF3B30">
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button onclick="generateTimeline()">Generate Timeline</button>
+                <button class="secondary" onclick="resetForm()">Reset</button>
+            </div>
+        </div>
+
+        <div id="timelineDisplay" style="display: none;">
+            <div class="timeline-card" id="timelineCard">
+                <div class="timeline-header">
+                    <div class="timeline-title" id="displayTitle">Timeline Title</div>
+                    <div class="timeline-dates" id="displayDates">Jan 1, 2024 - Dec 31, 2024</div>
+                </div>
+
+                <div class="scale-row" id="scaleRow"></div>
+
+                <div class="timeline-bar-container">
+                    <div class="timeline-bar" id="timelineBar"></div>
+                    <div class="today-indicator" id="todayIndicator">
+                        <div class="today-label">Today</div>
+                    </div>
+                </div>
+
+                <div class="timeline-endpoints">
+                    <div class="endpoint" id="startDateDisplay">Start</div>
+                    <div class="endpoint" id="endDateDisplay">End</div>
+                </div>
+
+                <div class="stats-section">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalUnits">0</div>
+                        <div class="stat-label" id="totalUnitsLabel">Total Weeks</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="percentComplete">0%</div>
+                        <div class="stat-label">Complete</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="unitsLeft">0</div>
+                        <div class="stat-label" id="unitsLeftLabel">Weeks Left</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="share-section">
+                <div class="share-label">Shareable Link</div>
+                <div class="share-input-group">
+                    <input type="text" class="share-input" id="shareUrl" readonly>
+                    <button onclick="copyLink()">Copy Link</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Parse URL parameters on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            
+            if (params.has('title')) {
+                document.getElementById('titleInput').value = decodeURIComponent(params.get('title'));
+                document.getElementById('startDate').value = params.get('start');
+                document.getElementById('endDate').value = params.get('end');
+                document.getElementById('scale').value = params.get('scale') || 'weekly';
+                
+                if (params.has('bgColor')) {
+                    document.getElementById('bgColor').value = params.get('bgColor');
+                }
+                if (params.has('barColor')) {
+                    document.getElementById('barColor').value = params.get('barColor');
+                }
+                if (params.has('todayColor')) {
+                    document.getElementById('todayColor').value = params.get('todayColor');
+                }
+                
+                generateTimeline();
+            } else {
+                // Set default dates
+                const today = new Date();
+                const threeMonthsLater = new Date(today);
+                threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
+                
+                document.getElementById('startDate').value = today.toISOString().split('T')[0];
+                document.getElementById('endDate').value = threeMonthsLater.toISOString().split('T')[0];
+            }
+        });
+
+        function generateTimeline() {
+            const title = document.getElementById('titleInput').value || 'Timeline';
+            const startDate = new Date(document.getElementById('startDate').value);
+            const endDate = new Date(document.getElementById('endDate').value);
+            const scale = document.getElementById('scale').value;
+            const bgColor = document.getElementById('bgColor').value;
+            const barColor = document.getElementById('barColor').value;
+            const todayColor = document.getElementById('todayColor').value;
+
+            if (isNaN(startDate) || isNaN(endDate)) {
+                alert('Please select valid start and end dates');
+                return;
+            }
+
+            if (startDate >= endDate) {
+                alert('End date must be after start date');
+                return;
+            }
+
+            // Apply colors
+            document.body.style.background = bgColor;
+            document.getElementById('todayIndicator').style.background = todayColor;
+            document.querySelector('.today-label').style.color = todayColor;
+            document.getElementById('todayIndicator').style.boxShadow = `0 0 8px ${todayColor}66`;
+
+            // Update display
+            document.getElementById('displayTitle').textContent = title;
+            document.getElementById('displayDates').textContent = 
+                `${formatDate(startDate)} - ${formatDate(endDate)}`;
+
+            // Generate scale and bar segments
+            generateScale(startDate, endDate, scale, barColor);
+
+            // Calculate progress
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+            const daysPassed = Math.max(0, Math.min(totalDays, Math.ceil((today - startDate) / (1000 * 60 * 60 * 24))));
+            const progress = (daysPassed / totalDays) * 100;
+
+            document.getElementById('todayIndicator').style.left = progress + '%';
+
+            // Update stats
+            updateStats(startDate, endDate, today, scale);
+
+            // Update endpoints
+            document.getElementById('startDateDisplay').textContent = formatDate(startDate);
+            document.getElementById('endDateDisplay').textContent = formatDate(endDate);
+
+            // Generate shareable URL
+            const url = new URL(window.location.href.split('?')[0]);
+            url.searchParams.set('title', encodeURIComponent(title));
+            url.searchParams.set('start', document.getElementById('startDate').value);
+            url.searchParams.set('end', document.getElementById('endDate').value);
+            url.searchParams.set('scale', scale);
+            url.searchParams.set('bgColor', bgColor);
+            url.searchParams.set('barColor', barColor);
+            url.searchParams.set('todayColor', todayColor);
+
+            document.getElementById('shareUrl').value = url.toString();
+
+            // Show timeline
+            document.getElementById('timelineDisplay').style.display = 'block';
+            
+            // Scroll to timeline
+            setTimeout(() => {
+                document.getElementById('timelineDisplay').scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+
+        function generateScale(startDate, endDate, scale, barColor) {
+            const scaleRow = document.getElementById('scaleRow');
+            const barContainer = document.getElementById('timelineBar');
+            scaleRow.innerHTML = '';
+            barContainer.innerHTML = '';
+
+            // Calculate today's position for segment coloring
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (scale === 'daily') {
+                generateDailyScale(startDate, endDate, today, scaleRow, barContainer, barColor);
+            } else if (scale === 'weekly') {
+                generateWeeklyScale(startDate, endDate, today, scaleRow, barContainer, barColor);
+            } else if (scale === 'monthly') {
+                generateMonthlyScale(startDate, endDate, today, scaleRow, barContainer, barColor);
+            } else if (scale === 'quarterly') {
+                generateQuarterlyScale(startDate, endDate, today, scaleRow, barContainer, barColor);
+            }
+
+            // Add grid lines overlay
+            const gridOverlay = document.createElement('div');
+            gridOverlay.className = 'timeline-grid';
+            gridOverlay.id = 'gridOverlay';
+            const segments = barContainer.children.length;
+            for (let i = 0; i < segments; i++) {
+                const gridLine = document.createElement('div');
+                gridLine.className = 'grid-line';
+                gridOverlay.appendChild(gridLine);
+            }
+            barContainer.appendChild(gridOverlay);
+        }
+
+        function generateDailyScale(startDate, endDate, today, scaleRow, barContainer, barColor) {
+            const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+            const lighterColor = adjustBrightness(barColor, 20);
+            const darkerColor = barColor;
+            
+            for (let i = 0; i <= days; i++) {
+                const date = new Date(startDate);
+                date.setDate(date.getDate() + i);
+                
+                // Create scale unit
+                const unit = document.createElement('div');
+                unit.className = 'scale-unit';
+                if (date.getDay() === 0 || date.getDay() === 6) {
+                    unit.classList.add('weekend');
+                }
+                
+                const label = document.createElement('div');
+                label.className = 'scale-label';
+                label.textContent = date.toLocaleDateString('en-US', { weekday: 'short' });
+                
+                const dateLabel = document.createElement('div');
+                dateLabel.className = 'scale-date';
+                dateLabel.textContent = date.getDate();
+                
+                unit.appendChild(label);
+                unit.appendChild(dateLabel);
+                scaleRow.appendChild(unit);
+
+                // Create bar segment - one per day
+                if (i < days) {
+                    const segment = document.createElement('div');
+                    segment.className = 'timeline-segment';
+                    const segmentColor = i % 2 === 0 ? lighterColor : darkerColor;
+                    segment.style.background = segmentColor;
+                    
+                    barContainer.appendChild(segment);
+                }
+            }
+        }
+
+        function generateWeeklyScale(startDate, endDate, today, scaleRow, barContainer, barColor) {
+            const weeks = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24 * 7));
+            const lighterColor = adjustBrightness(barColor, 20);
+            const darkerColor = barColor;
+            
+            for (let i = 0; i <= weeks; i++) {
+                const date = new Date(startDate);
+                date.setDate(date.getDate() + (i * 7));
+                
+                // Create scale unit
+                const unit = document.createElement('div');
+                unit.className = 'scale-unit';
+                
+                const label = document.createElement('div');
+                label.className = 'scale-label';
+                label.textContent = `W${i + 1}`;
+                
+                const dateLabel = document.createElement('div');
+                dateLabel.className = 'scale-date';
+                dateLabel.textContent = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                
+                unit.appendChild(label);
+                unit.appendChild(dateLabel);
+                scaleRow.appendChild(unit);
+
+                // Create bar segment - one per week
+                if (i < weeks) {
+                    const segment = document.createElement('div');
+                    segment.className = 'timeline-segment';
+                    const segmentColor = i % 2 === 0 ? lighterColor : darkerColor;
+                    segment.style.background = segmentColor;
+                    
+                    barContainer.appendChild(segment);
+                }
+            }
+        }
+
+        function generateMonthlyScale(startDate, endDate, today, scaleRow, barContainer, barColor) {
+            let current = new Date(startDate);
+            let count = 0;
+            const lighterColor = adjustBrightness(barColor, 20);
+            const darkerColor = barColor;
+            
+            while (current <= endDate) {
+                // Create scale unit
+                const unit = document.createElement('div');
+                unit.className = 'scale-unit';
+                
+                const label = document.createElement('div');
+                label.className = 'scale-label';
+                label.textContent = current.toLocaleDateString('en-US', { month: 'short' });
+                
+                const dateLabel = document.createElement('div');
+                dateLabel.className = 'scale-date';
+                dateLabel.textContent = current.getFullYear();
+                
+                unit.appendChild(label);
+                unit.appendChild(dateLabel);
+                scaleRow.appendChild(unit);
+                
+                // Create bar segment - one per month
+                const nextMonth = new Date(current);
+                nextMonth.setMonth(nextMonth.getMonth() + 1);
+                
+                if (nextMonth <= endDate || count === 0) {
+                    const segment = document.createElement('div');
+                    segment.className = 'timeline-segment';
+                    const segmentColor = count % 2 === 0 ? lighterColor : darkerColor;
+                    segment.style.background = segmentColor;
+                    
+                    barContainer.appendChild(segment);
+                }
+                
+                current.setMonth(current.getMonth() + 1);
+                count++;
+            }
+        }
+
+        function generateQuarterlyScale(startDate, endDate, today, scaleRow, barContainer, barColor) {
+            let current = new Date(startDate);
+            let count = 0;
+            const lighterColor = adjustBrightness(barColor, 20);
+            const darkerColor = barColor;
+            
+            while (current <= endDate) {
+                // Create scale unit
+                const unit = document.createElement('div');
+                unit.className = 'scale-unit';
+                
+                const quarter = Math.floor(current.getMonth() / 3) + 1;
+                
+                const label = document.createElement('div');
+                label.className = 'scale-label';
+                label.textContent = `Q${quarter}`;
+                
+                const dateLabel = document.createElement('div');
+                dateLabel.className = 'scale-date';
+                dateLabel.textContent = current.getFullYear();
+                
+                unit.appendChild(label);
+                unit.appendChild(dateLabel);
+                scaleRow.appendChild(unit);
+                
+                // Create bar segment - one per quarter
+                const nextQuarter = new Date(current);
+                nextQuarter.setMonth(nextQuarter.getMonth() + 3);
+                
+                if (nextQuarter <= endDate || count === 0) {
+                    const segment = document.createElement('div');
+                    segment.className = 'timeline-segment';
+                    const segmentColor = count % 2 === 0 ? lighterColor : darkerColor;
+                    segment.style.background = segmentColor;
+                    
+                    barContainer.appendChild(segment);
+                }
+                
+                current.setMonth(current.getMonth() + 3);
+                count++;
+            }
+        }
+
+        function updateStats(startDate, endDate, today, scale) {
+            const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+            const daysPassed = Math.max(0, Math.min(totalDays, Math.ceil((today - startDate) / (1000 * 60 * 60 * 24))));
+            const daysLeft = Math.max(0, totalDays - daysPassed);
+            const percentComplete = Math.round((daysPassed / totalDays) * 100);
+
+            let unit, totalUnits, unitsLeft;
+
+            if (scale === 'daily') {
+                unit = 'Day';
+                totalUnits = totalDays;
+                unitsLeft = daysLeft;
+            } else if (scale === 'weekly') {
+                unit = 'Week';
+                totalUnits = Math.ceil(totalDays / 7);
+                unitsLeft = Math.ceil(daysLeft / 7);
+            } else if (scale === 'monthly') {
+                unit = 'Month';
+                totalUnits = Math.ceil(totalDays / 30);
+                unitsLeft = Math.ceil(daysLeft / 30);
+            } else if (scale === 'quarterly') {
+                unit = 'Quarter';
+                totalUnits = Math.ceil(totalDays / 90);
+                unitsLeft = Math.ceil(daysLeft / 90);
+            }
+
+            document.getElementById('totalUnits').textContent = totalUnits;
+            document.getElementById('totalUnitsLabel').textContent = `Total ${unit}${totalUnits !== 1 ? 's' : ''}`;
+            document.getElementById('percentComplete').textContent = percentComplete + '%';
+            document.getElementById('unitsLeft').textContent = unitsLeft;
+            document.getElementById('unitsLeftLabel').textContent = `${unit}${unitsLeft !== 1 ? 's' : ''} Left`;
+        }
+
+        function formatDate(date) {
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function adjustBrightness(color, percent) {
+            const num = parseInt(color.replace("#", ""), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+                (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+                (B < 255 ? B < 1 ? 0 : B : 255))
+                .toString(16).slice(1);
+        }
+
+        function copyLink() {
+            const shareUrl = document.getElementById('shareUrl');
+            shareUrl.select();
+            shareUrl.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(shareUrl.value);
+            
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = 'Copied!';
+            setTimeout(() => {
+                button.textContent = originalText;
+            }, 2000);
+        }
+
+        function resetForm() {
+            const today = new Date();
+            const threeMonthsLater = new Date(today);
+            threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
+            
+            document.getElementById('titleInput').value = '';
+            document.getElementById('startDate').value = today.toISOString().split('T')[0];
+            document.getElementById('endDate').value = threeMonthsLater.toISOString().split('T')[0];
+            document.getElementById('scale').value = 'weekly';
+            document.getElementById('bgColor').value = '#f5f5f7';
+            document.getElementById('barColor').value = '#007AFF';
+            document.getElementById('todayColor').value = '#FF3B30';
+            document.getElementById('timelineDisplay').style.display = 'none';
+            
+            window.history.pushState({}, '', window.location.pathname);
+        }
+
+        // Auto-refresh every hour to keep "today" accurate
+        setInterval(() => {
+            if (document.getElementById('timelineDisplay').style.display !== 'none') {
+                generateTimeline();
+            }
+        }, 3600000); // 1 hour
+    </script>
 </body>
 </html>
