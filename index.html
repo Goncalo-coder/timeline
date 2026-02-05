@@ -2,119 +2,189 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <title>Timeline Builder</title>
 
 <style>
-:root {
-  --bg: #0f172a;
-  --card: #020617;
-  --accent: #6366f1;
-  --line: #f43f5e;
-  --text: #e5e7eb;
+
+:root{
+  --bg:#0f172a;
+  --bar:#6366f1;
+  --line:#ef4444;
+  --card:#020617;
+  --text:#e5e7eb;
+  --muted:#94a3b8;
 }
 
-body {
-  margin: 0;
-  font-family: system-ui, sans-serif;
-  background: var(--bg);
-  color: var(--text);
+*{
+  box-sizing:border-box;
+  font-family:system-ui,sans-serif;
 }
 
-.app {
-  max-width: 1200px;
-  margin: auto;
-  padding: 40px 20px;
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
 }
 
-h1 {
-  text-align: center;
-  margin-bottom: 30px;
+.app{
+  max-width:1200px;
+  margin:auto;
+  padding:30px 20px;
 }
 
-/* Controls */
+/* ================= CONTROLS ================= */
 
-.controls {
-  display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
-  gap: 15px;
-  margin-bottom: 30px;
+.controls{
+  background:var(--card);
+  padding:20px;
+  border-radius:12px;
+  margin-bottom:25px;
+
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:15px;
 }
 
-input, select, button {
-  padding: 10px;
-  border-radius: 6px;
-  border: none;
-  font-size: 14px;
+.controls input,
+.controls select,
+.controls button{
+  padding:10px;
+  border-radius:6px;
+  border:none;
+  font-size:14px;
 }
 
-button {
-  background: var(--accent);
-  color: white;
-  cursor: pointer;
+.controls button{
+  background:var(--bar);
+  color:white;
+  cursor:pointer;
 }
 
-button:hover {
-  opacity: .9;
+.controls button:hover{
+  opacity:.9;
 }
 
-/* Timeline */
+/* ================= CARD ================= */
 
-.timeline-wrapper {
-  background: var(--card);
-  border-radius: 12px;
-  padding: 20px;
-  overflow-x: auto;
+.card{
+  background:var(--card);
+  border-radius:16px;
+  padding:25px;
 }
 
-.timeline {
-  position: relative;
-  height: 100px;
-  min-width: 600px;
-  display: flex;
+/* ================= HEADER ================= */
+
+.header{
+  text-align:center;
+  margin-bottom:25px;
 }
 
-.segment {
-  flex: 1;
-  border-right: 1px solid #1e293b;
-  text-align: center;
-  font-size: 12px;
-  padding-top: 70px;
-  color: #94a3b8;
+.header h1{
+  margin:0;
+  font-size:26px;
 }
 
-.segment:last-child {
-  border-right: none;
+.header p{
+  margin:5px 0 0;
+  color:var(--muted);
+}
+
+/* ================= TIMELINE ================= */
+
+.timeline-wrapper{
+  position:relative;
+  margin:25px 0;
+  overflow:hidden;
+}
+
+.scale-row{
+  display:flex;
+  font-size:12px;
+  color:var(--muted);
+}
+
+.scale-item{
+  flex:1;
+  text-align:center;
+  border-right:1px solid #1e293b;
+  padding-bottom:8px;
+}
+
+.scale-item:last-child{
+  border:none;
 }
 
 /* Bar */
 
-.bar {
-  position: absolute;
-  top: 30px;
-  left: 0;
-  height: 20px;
-  background: linear-gradient(90deg,#6366f1,#8b5cf6);
-  border-radius: 10px;
+.bar-container{
+  position:relative;
+  height:40px;
+  background:#020617;
+  border-radius:20px;
+  overflow:hidden;
 }
 
-/* Today line */
-
-.today {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--line);
+.bar{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,var(--bar),#8b5cf6);
 }
 
-.today-label {
-  position: absolute;
-  top: -22px;
-  transform: translateX(-50%);
-  font-size: 12px;
-  color: var(--line);
+/* Today */
+
+.today{
+  position:absolute;
+  top:-10px;
+  bottom:-10px;
+  width:2px;
+  background:var(--line);
 }
+
+.today-label{
+  position:absolute;
+  top:-22px;
+  transform:translateX(-50%);
+  font-size:11px;
+  color:var(--line);
+}
+
+/* ================= STATS ================= */
+
+.stats{
+  display:flex;
+  justify-content:space-around;
+  margin-top:25px;
+  text-align:center;
+}
+
+.stat strong{
+  font-size:26px;
+  display:block;
+}
+
+.stat span{
+  font-size:13px;
+  color:var(--muted);
+}
+
+/* ================= SHARE ================= */
+
+.share{
+  margin-top:25px;
+  text-align:center;
+}
+
+.share input{
+  width:100%;
+  padding:10px;
+  border-radius:6px;
+  border:none;
+  background:#020617;
+  color:white;
+}
+
 </style>
 </head>
 
@@ -122,26 +192,79 @@ button:hover {
 
 <div class="app">
 
-<h1>Timeline Builder</h1>
+<!-- ================= CONTROLS ================= -->
 
 <div class="controls">
+
+<input id="title" placeholder="Timeline title">
 
 <input type="date" id="start">
 <input type="date" id="end">
 
 <select id="scale">
+  <option value="day">Daily</option>
   <option value="week">Weekly</option>
   <option value="month">Monthly</option>
   <option value="quarter">Quarterly</option>
 </select>
 
-<button onclick="build()">Generate</button>
+<input type="color" id="bg" title="Background">
+<input type="color" id="bar" title="Bar color">
+<input type="color" id="line" title="Today line">
 
+<button onclick="generate()">Generate</button>
+
+</div>
+
+<!-- ================= PREVIEW ================= -->
+
+<div class="card">
+
+<div class="header">
+  <h1 id="viewTitle"></h1>
+  <p id="viewDates"></p>
 </div>
 
 <div class="timeline-wrapper">
 
-  <div class="timeline" id="timeline"></div>
+<div class="scale-row" id="scaleRow"></div>
+
+<div class="bar-container">
+
+  <div class="bar"></div>
+
+  <div class="today" id="todayLine"></div>
+  <div class="today-label" id="todayLabel">Today</div>
+
+</div>
+
+</div>
+
+<div class="stats">
+
+<div class="stat">
+  <strong id="total"></strong>
+  <span id="unitLabel"></span>
+</div>
+
+<div class="stat">
+  <strong id="percent"></strong>
+  <span>Complete</span>
+</div>
+
+<div class="stat">
+  <strong id="left"></strong>
+  <span>Left</span>
+</div>
+
+</div>
+
+<div class="share">
+
+<p>Shareable URL</p>
+<input id="shareLink" readonly>
+
+</div>
 
 </div>
 
@@ -149,196 +272,227 @@ button:hover {
 
 <script>
 
-const startInput = document.getElementById("start");
-const endInput = document.getElementById("end");
-const scaleSelect = document.getElementById("scale");
-const timeline = document.getElementById("timeline");
+/* ================= HELPERS ================= */
 
-/* Default dates */
+function qs(k){
+  return new URLSearchParams(location.search).get(k);
+}
 
-const today = new Date();
-startInput.value = format(today);
-
-const end = new Date();
-end.setMonth(end.getMonth() + 3);
-endInput.value = format(end);
-
-/* Format yyyy-mm-dd */
-
-function format(d) {
+function format(d){
   return d.toISOString().split("T")[0];
 }
 
-/* Build timeline */
+function diffDays(a,b){
+  return Math.ceil((b-a)/86400000);
+}
 
-function build() {
+/* ================= DEFAULTS ================= */
 
-  const start = new Date(startInput.value);
-  const end = new Date(endInput.value);
-  const scale = scaleSelect.value;
+const now = new Date();
 
-  if (start >= end) {
-    alert("End date must be after start date");
-    return;
-  }
+const defaults = {
+  title:"My Timeline",
+  start:format(now),
+  end:format(new Date(now.getFullYear(),now.getMonth()+1,now.getDate())),
+  scale:"week",
+  bg:"#0f172a",
+  bar:"#6366f1",
+  line:"#ef4444"
+};
 
-  timeline.innerHTML = "";
+/* ================= INIT ================= */
 
-  let segments = [];
+const cfg = {
+  title:qs("title") || defaults.title,
+  start:qs("start") || defaults.start,
+  end:qs("end") || defaults.end,
+  scale:qs("scale") || defaults.scale,
+  bg:qs("bg") || defaults.bg,
+  bar:qs("bar") || defaults.bar,
+  line:qs("line") || defaults.line
+};
 
-  if (scale === "week") {
-    segments = buildWeeks(start, end);
-  }
+document.body.style.background = cfg.bg;
+document.documentElement.style.setProperty("--bar",cfg.bar);
+document.documentElement.style.setProperty("--line",cfg.line);
 
-  if (scale === "month") {
-    segments = buildMonths(start, end);
-  }
+/* Fill controls */
 
-  if (scale === "quarter") {
-    segments = buildQuarters(start, end);
-  }
+title.value = cfg.title;
+start.value = cfg.start;
+end.value = cfg.end;
+scale.value = cfg.scale;
+bg.value = cfg.bg;
+bar.value = cfg.bar;
+line.value = cfg.line;
 
-  /* Render segments */
+/* ================= BUILD ================= */
 
-  segments.forEach(s => {
+build();
 
-    const div = document.createElement("div");
-    div.className = "segment";
-    div.textContent = s.label;
+function build(){
 
-    timeline.appendChild(div);
+  const s = new Date(start.value);
+  const e = new Date(end.value);
+  const n = new Date();
 
-  });
+  const totalDays = diffDays(s,e);
+  const doneDays = Math.max(0,Math.min(totalDays,diffDays(s,n)));
+  const percent = Math.round(doneDays/totalDays*100);
 
-  /* Bar */
+  viewTitle.textContent = title.value;
+  viewDates.textContent =
+    s.toDateString()+" — "+e.toDateString();
 
-  const bar = document.createElement("div");
-  bar.className = "bar";
-
-  const total = end - start;
-  bar.style.width = "100%";
-
-  timeline.appendChild(bar);
+  renderScale(s,e,scale.value);
 
   /* Today line */
 
-  renderToday(start, end);
-}
+  if(n>=s && n<=e){
 
-/* Time segments */
+    const p = doneDays/totalDays*100;
 
-function buildWeeks(start, end) {
+    todayLine.style.left = p+"%";
+    todayLabel.style.left = p+"%";
 
-  let list = [];
-  let d = new Date(start);
-
-  while (d < end) {
-
-    const label =
-      "W" +
-      getWeek(d) +
-      " " +
-      d.getFullYear();
-
-    list.push({ label });
-
-    d.setDate(d.getDate() + 7);
+  }else{
+    todayLine.style.display="none";
+    todayLabel.style.display="none";
   }
 
-  return list;
-}
+  /* Stats */
 
-function buildMonths(start, end) {
+  let units,total,left;
 
-  let list = [];
-  let d = new Date(start);
-
-  while (d < end) {
-
-    const label =
-      d.toLocaleString("default",{month:"short"}) +
-      " " +
-      d.getFullYear();
-
-    list.push({ label });
-
-    d.setMonth(d.getMonth() + 1);
+  if(scale.value==="day"){
+    units=totalDays;
+    unitLabel.textContent="Total Days";
   }
 
-  return list;
-}
-
-function buildQuarters(start, end) {
-
-  let list = [];
-  let d = new Date(start);
-
-  while (d < end) {
-
-    const q = Math.floor(d.getMonth()/3)+1;
-
-    list.push({
-      label: "Q" + q + " " + d.getFullYear()
-    });
-
-    d.setMonth(d.getMonth() + 3);
+  if(scale.value==="week"){
+    units=Math.ceil(totalDays/7);
+    unitLabel.textContent="Total Weeks";
   }
 
-  return list;
+  if(scale.value==="month"){
+    units=(e.getFullYear()-s.getFullYear())*12+(e.getMonth()-s.getMonth());
+    unitLabel.textContent="Total Months";
+  }
+
+  if(scale.value==="quarter"){
+    units=Math.ceil(((e-s)/86400000)/90);
+    unitLabel.textContent="Total Quarters";
+  }
+
+  left = Math.max(0,Math.round(units-units*(percent/100)));
+
+  total.textContent = units;
+  percent.textContent = percent+"%";
+  left.textContent = left;
+
+  /* Share URL */
+
+  const url =
+    location.origin+
+    location.pathname+
+    `?title=${encodeURIComponent(title.value)}`+
+    `&start=${start.value}`+
+    `&end=${end.value}`+
+    `&scale=${scale.value}`+
+    `&bg=${bg.value.replace("#","%23")}`+
+    `&bar=${bar.value.replace("#","%23")}`+
+    `&line=${line.value.replace("#","%23")}`;
+
+  shareLink.value = url;
 }
 
-/* Week number */
+/* ================= SCALE ================= */
 
-function getWeek(d) {
+function renderScale(s,e,type){
 
-  d = new Date(Date.UTC(
-    d.getFullYear(),
-    d.getMonth(),
-    d.getDate()
-  ));
+  scaleRow.innerHTML="";
 
-  const yearStart =
-    new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  if(type==="day"){
+    let d=new Date(s);
 
-  const weekNo =
-    Math.ceil((((d - yearStart)/86400000)+1)/7);
+    while(d<e){
 
-  return weekNo;
+      addScale(
+        d.toLocaleDateString("en",{day:"2-digit",month:"short"})
+      );
+
+      d.setDate(d.getDate()+1);
+    }
+  }
+
+  if(type==="week"){
+    let d=new Date(s);
+    let i=1;
+
+    while(d<e){
+
+      addScale("W"+i);
+      i++;
+      d.setDate(d.getDate()+7);
+    }
+  }
+
+  if(type==="month"){
+    let d=new Date(s);
+
+    while(d<e){
+
+      addScale(
+        d.toLocaleDateString("en",{month:"short",year:"numeric"})
+      );
+
+      d.setMonth(d.getMonth()+1);
+    }
+  }
+
+  if(type==="quarter"){
+    let d=new Date(s);
+
+    while(d<e){
+
+      const q=Math.floor(d.getMonth()/3)+1;
+      addScale("Q"+q+" "+d.getFullYear());
+
+      d.setMonth(d.getMonth()+3);
+    }
+  }
+
 }
 
-/* Today line */
+function addScale(label){
 
-function renderToday(start, end) {
+  const div=document.createElement("div");
+  div.className="scale-item";
+  div.textContent=label;
 
-  const now = new Date();
-
-  if (now < start || now > end) return;
-
-  const percent =
-    (now - start) / (end - start) * 100;
-
-  const line = document.createElement("div");
-  line.className = "today";
-
-  line.style.left = percent + "%";
-
-  const label = document.createElement("div");
-  label.className = "today-label";
-  label.textContent = "Today";
-
-  label.style.left = percent + "%";
-
-  timeline.appendChild(line);
-  timeline.appendChild(label);
+  scaleRow.appendChild(div);
 }
 
-/* Auto refresh every hour */
+/* ================= GENERATE ================= */
 
-setInterval(build, 1000 * 60 * 60);
+function generate(){
 
-/* Initial */
+  const url =
+    location.pathname+
+    `?title=${encodeURIComponent(title.value)}`+
+    `&start=${start.value}`+
+    `&end=${end.value}`+
+    `&scale=${scale.value}`+
+    `&bg=${bg.value.replace("#","%23")}`+
+    `&bar=${bar.value.replace("#","%23")}`+
+    `&line=${line.value.replace("#","%23")}`;
 
-build();
+  location.href = url;
+}
+
+/* Auto refresh daily */
+
+setInterval(build,3600000);
 
 </script>
 
